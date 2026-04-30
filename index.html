@@ -34,7 +34,7 @@
             object-fit: cover !important;
         }
 
-        /* Animación de escaneo (común) */
+        /* Animación de escaneo QR */
         .scanner-line {
             position: absolute;
             top: 20%;
@@ -56,12 +56,10 @@
         .face-mask {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            /* Crea un hueco ovalado en el centro */
-            clip-path: inset(0 0 0 0 round 0);
-            mask-image: radial-gradient(ellipse 45% 65% at 50% 50%, transparent 100%, black 100%);
-            -webkit-mask-image: radial-gradient(ellipse 35% 55% at 50% 50%, transparent 99%, black 100%);
+            background: rgba(0, 0, 0, 0.7);
             z-index: 5;
+            mask-image: radial-gradient(ellipse 45% 65% at 50% 50%, transparent 99%, black 100%);
+            -webkit-mask-image: radial-gradient(ellipse 35% 55% at 50% 50%, transparent 99%, black 100%);
         }
 
         .face-border {
@@ -71,9 +69,45 @@
             transform: translate(-50%, -50%);
             width: 70%;
             height: 80%;
-            border: 3px dashed rgba(34, 197, 94, 0.6);
+            border: 4px dashed rgba(255, 255, 255, 0.3);
             border-radius: 50% / 50%;
             z-index: 6;
+            transition: all 0.5s ease;
+        }
+
+        .face-border.detected {
+            border: 4px solid #22c55e;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+            transform: translate(-50%, -50%) scale(1.02);
+        }
+
+        /* Efecto de Flash */
+        #flash-effect {
+            position: absolute;
+            inset: 0;
+            background: white;
+            opacity: 0;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .flash-active {
+            animation: flashAnim 0.5s ease-out;
+        }
+
+        @keyframes flashAnim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Barra de progreso circular alrededor del rostro */
+        .progress-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            z-index: 7;
+            pointer-events: none;
         }
 
         .modal-animate-in {
@@ -95,6 +129,9 @@
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative">
+        <!-- Efecto de Flash -->
+        <div id="flash-effect"></div>
+
         <!-- Botón de Ayuda -->
         <button id="open-help" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 p-2 rounded-full text-white z-30 transition-all">
             <i data-lucide="help-circle" class="w-6 h-6"></i>
@@ -145,38 +182,50 @@
         <!-- SECCIÓN RECONOCIMIENTO FACIAL -->
         <div id="section-face" class="p-6 hidden">
             <!-- Instrucciones Previas -->
-            <div id="face-instructions" class="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4">
-                <h3 class="text-blue-800 font-bold text-sm mb-2 flex items-center gap-2">
-                    <i data-lucide="info" class="w-4 h-4"></i> Recomendaciones
+            <div id="face-instructions" class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-4 transition-opacity">
+                <h3 class="text-indigo-800 font-bold text-sm mb-2 flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Captura Inteligente
                 </h3>
-                <ul class="text-xs text-blue-700 space-y-1">
-                    <li>• Busca un lugar con buena iluminación frontal.</li>
-                    <li>• Evita usar gorras o gafas oscuras.</li>
-                    <li>• Mantén una expresión neutral.</li>
-                    <li>• Centra tu rostro en el óvalo guía.</li>
-                </ul>
+                <p id="face-guidance-msg" class="text-xs text-indigo-700">Inicia la cámara y centra tu rostro en el óvalo. La foto se tomará automáticamente al detectar estabilidad.</p>
             </div>
 
             <div id="face-scanner-wrapper" class="relative w-full aspect-square bg-black rounded-2xl overflow-hidden mb-4 shadow-inner">
                 <div id="face-video-container" class="w-full h-full"></div>
+                
+                <!-- Overlay Facial con Óvalo -->
                 <div id="face-overlay" class="absolute inset-0 pointer-events-none hidden z-10">
                     <div class="face-mask"></div>
-                    <div class="face-border"></div>
-                    <div id="face-scan-line" class="scanner-line"></div>
+                    <div id="face-guide-border" class="face-border"></div>
+                    
+                    <!-- Círculo de progreso SVG -->
+                    <svg class="progress-ring" width="320" height="320">
+                        <ellipse 
+                            id="progress-circle"
+                            cx="160" cy="160" rx="112" ry="128"
+                            fill="transparent"
+                            stroke="#22c55e"
+                            stroke-width="6"
+                            stroke-dasharray="800"
+                            stroke-dashoffset="800"
+                            stroke-linecap="round"
+                            style="transition: stroke-dashoffset 0.1s linear;"
+                        />
+                    </svg>
                 </div>
+
                 <div id="face-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-gray-900 z-20">
-                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4 text-blue-500">
+                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4 text-green-500">
                         <i data-lucide="user-check" class="w-8 h-8"></i>
                     </div>
                     <p class="text-gray-400 text-sm mb-4">Reconocimiento Facial</p>
                     <button onclick="startFace()" class="px-6 py-2 bg-green-600 text-white rounded-full font-bold text-sm hover:bg-green-700 transition-all shadow-lg shadow-green-600/30">
-                        Iniciar Reconocimiento
+                        Iniciar Cámara Frontal
                     </button>
                 </div>
             </div>
 
             <button id="stop-face-btn" class="hidden w-full mb-4 py-3 border-2 border-gray-200 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
-                <i data-lucide="square" class="w-4 h-4 fill-current"></i> Cancelar
+                <i data-lucide="square" class="w-4 h-4 fill-current"></i> Cancelar Captura
             </button>
         </div>
 
@@ -187,7 +236,7 @@
                     <i data-lucide="check-circle-2" class="text-green-600 w-6 h-6"></i>
                     <div>
                         <p class="text-xs text-green-700 font-semibold uppercase tracking-wider">Identidad Verificada</p>
-                        <p id="id-text" class="text-gray-800 font-bold">USUARIO_VALIDADO</p>
+                        <p id="id-text" class="text-gray-800 font-bold">CARA_DETECTADA_OK</p>
                     </div>
                 </div>
                 <button id="send-btn" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
@@ -208,8 +257,8 @@
                     <div><p class="font-bold text-sm">Código QR</p><p class="text-xs text-gray-500">Muestre su código a la cámara trasera.</p></div>
                 </div>
                 <div class="flex gap-3">
-                    <div class="bg-blue-100 p-2 rounded-lg h-fit"><i data-lucide="user-square" class="w-5 h-5 text-blue-600"></i></div>
-                    <div><p class="font-bold text-sm">Reconocimiento Facial</p><p class="text-xs text-gray-500">Use la cámara frontal y centre su rostro en el óvalo.</p></div>
+                    <div class="bg-indigo-100 p-2 rounded-lg h-fit"><i data-lucide="user-square" class="w-5 h-5 text-indigo-600"></i></div>
+                    <div><p class="font-bold text-sm">Facial Automático</p><p class="text-xs text-gray-500">Mantenga el rostro centrado y quieto por 3 segundos.</p></div>
                 </div>
             </div>
             <button onclick="closeModal('help-modal')" class="w-full py-3 bg-green-600 text-white rounded-xl font-bold">Entendido</button>
@@ -235,10 +284,15 @@
         const tabs = { qr: document.getElementById('btn-tab-qr'), face: document.getElementById('btn-tab-face') };
         const resultContainer = document.getElementById('result-container');
         const statusText = document.getElementById('status-text');
+        const faceGuidance = document.getElementById('face-guidance-msg');
+        const faceGuideBorder = document.getElementById('face-guide-border');
+        const progressCircle = document.getElementById('progress-circle');
+        const flashEffect = document.getElementById('flash-effect');
         
         let html5QrCode = new Html5Qrcode("reader");
         let faceStream = null;
-        let isProcessing = false;
+        let captureTimer = null;
+        let progressInterval = null;
 
         // --- NAVIGATION ---
         function switchTab(mode) {
@@ -256,7 +310,7 @@
                 sections.qr.classList.add('hidden');
                 tabs.face.classList.add('tab-active');
                 tabs.qr.classList.remove('tab-active');
-                statusText.textContent = "Centra tu rostro en el óvalo guía";
+                statusText.textContent = "Posiciona tu rostro para iniciar el auto-escaneo";
             }
         }
 
@@ -272,10 +326,10 @@
             try {
                 const config = { fps: 20, qrbox: { width: 280, height: 280 } };
                 await html5QrCode.start({ facingMode: "environment" }, config, (text) => {
-                    handleDetection("QR: " + text);
+                    handleDetection("ID_QR: " + text.substring(0,10));
                 });
             } catch (err) {
-                alert("Error al acceder a la cámara");
+                alert("Error al acceder a la cámara trasera");
                 resetQrUI();
             }
         }
@@ -286,42 +340,80 @@
             document.getElementById('stop-qr-btn').classList.add('hidden');
         }
 
-        // --- FACE LOGIC ---
+        // --- FACE LOGIC (AUTOMATIZADA) ---
         async function startFace() {
             document.getElementById('face-placeholder').classList.add('hidden');
             document.getElementById('face-overlay').classList.remove('hidden');
             document.getElementById('stop-face-btn').classList.remove('hidden');
-            document.getElementById('face-instructions').classList.add('opacity-50');
+            
+            faceGuidance.textContent = "Buscando rostro... Por favor centra tu rostro en el óvalo.";
+            faceGuidance.className = "text-xs text-indigo-700 font-medium";
 
             try {
                 faceStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", width: { ideal: 500 }, height: { ideal: 500 } } 
+                    video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } } 
                 });
                 
                 const video = document.createElement('video');
                 video.srcObject = faceStream;
                 video.autoplay = true;
                 video.muted = true;
-                video.className = "w-full h-full object-cover";
+                video.className = "w-full h-full object-cover scale-x-[-1]"; // Mirror effect
                 document.getElementById('face-video-container').appendChild(video);
 
-                // Simulamos reconocimiento facial (3 segundos)
-                statusText.textContent = "Analizando facciones...";
+                // Simulamos detección inicial (1.5 segundos de búsqueda)
                 setTimeout(() => {
-                    if (faceStream) handleDetection("ID_FACIAL_VERIFICADO");
-                }, 3500);
+                    if (faceStream) initiateAutoCapture();
+                }, 1500);
 
             } catch (err) {
-                alert("Permiso de cámara denegado");
+                alert("No se pudo acceder a la cámara frontal.");
                 resetFaceUI();
             }
+        }
+
+        function initiateAutoCapture() {
+            // Rostro "detectado"
+            faceGuideBorder.classList.add('detected');
+            faceGuidance.textContent = "¡Rostro detectado! Por favor quédate quieto, ya vamos a tomar la foto...";
+            faceGuidance.className = "text-xs text-green-700 font-bold animate-pulse";
+            statusText.textContent = "Capturando automáticamente...";
+
+            let progress = 0;
+            const duration = 3000; // 3 segundos para captura
+            const interval = 50;
+            const step = (800 / (duration / interval));
+
+            progressCircle.style.strokeDashoffset = "800";
+
+            progressInterval = setInterval(() => {
+                progress += step;
+                progressCircle.style.strokeDashoffset = (800 - progress).toString();
+                
+                if (progress >= 800) {
+                    clearInterval(progressInterval);
+                    triggerFlashAndCapture();
+                }
+            }, interval);
+        }
+
+        function triggerFlashAndCapture() {
+            // Efecto Visual de Flash
+            flashEffect.classList.add('flash-active');
+            setTimeout(() => flashEffect.classList.remove('flash-active'), 500);
+
+            // Finalizar captura
+            handleDetection("BIO_FACIAL_VERIFICADO");
         }
 
         function resetFaceUI() {
             document.getElementById('face-placeholder').classList.remove('hidden');
             document.getElementById('face-overlay').classList.add('hidden');
             document.getElementById('stop-face-btn').classList.add('hidden');
-            document.getElementById('face-instructions').classList.remove('opacity-50');
+            faceGuideBorder.classList.remove('detected');
+            progressCircle.style.strokeDashoffset = "800";
+            if (progressInterval) clearInterval(progressInterval);
+            
             const container = document.getElementById('face-video-container');
             container.innerHTML = '';
         }
@@ -330,11 +422,12 @@
         function handleDetection(id) {
             document.getElementById('id-text').textContent = id;
             resultContainer.classList.remove('hidden');
-            statusText.textContent = "Identidad validada correctamente";
+            statusText.textContent = "Validación completada con éxito";
             stopAllCameras();
         }
 
         async function stopAllCameras() {
+            if (progressInterval) clearInterval(progressInterval);
             // Stop QR
             try { if (html5QrCode.isScanning) await html5QrCode.stop(); } catch(e){}
             resetQrUI();
@@ -352,11 +445,11 @@
 
         document.getElementById('send-btn').onclick = () => {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            const dateStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'long' });
+            const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
 
             document.getElementById('success-message').innerHTML = 
-                `Su registro se ha guardado correctamente a las <b>${timeStr}</b> del día ${dateStr}.`;
+                `Su entrada se registró correctamente a las <b>${timeStr}</b> del día ${dateStr}.`;
             document.getElementById('success-modal').classList.remove('hidden');
             document.getElementById('success-modal').classList.add('flex');
         };
