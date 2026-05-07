@@ -204,7 +204,7 @@
                 <i data-lucide="user" class="w-10 h-10"></i>
             </div>
             <h2 class="text-xl font-bold text-slate-500 mb-1">Verificación de Usuario</h2>
-            <p class="text-2xl font-extrabold text-slate-800 mb-8 leading-tight" id="display-name">¿Eres Pepito Perez?</p>
+            <p class="text-2xl font-extrabold text-slate-800 mb-8 leading-tight" id="display-name"></p>
             <div class="grid gap-3">
                 <button id="btn-confirm-attendance" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg">Sí, Confirmar</button>
                 <button id="btn-cancel-attendance" class="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl">No, no soy yo</button>
@@ -408,11 +408,14 @@
                 const data = await res.json();
                 setLoading(false);
 
+                // Manejamos tanto éxitos como errores controlados (ej: 404 de ya registrado)
+                const messageToShow = data.message || data.resultado || "Respuesta del sistema no disponible";
+
                 if (res.ok) {
-                    // CRÍTICO: Mostramos el mensaje exacto que regresa tu servidor ("Entrada/Salida registrada exitosamente...")
-                    showFinalResult(true, "¡Registrado!", data.message || data.resultado || `Registro completado para ${nombre}`);
+                    showFinalResult(true, "¡Registrado!", messageToShow);
                 } else {
-                    showFinalResult(false, "Error de Registro", data.message || "No se pudo procesar la asistencia.");
+                    // Si el servidor retorna error (404, 400, etc.), mostramos su mensaje exacto
+                    showFinalResult(false, "Atención", messageToShow);
                 }
             } catch (e) {
                 setLoading(false);
@@ -449,9 +452,10 @@
                 icon.setAttribute('data-lucide', 'check');
                 document.getElementById('result-title').className = "text-2xl font-bold text-emerald-600 mb-2";
             } else {
-                container.className = "w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6";
-                icon.setAttribute('data-lucide', 'x-circle');
-                document.getElementById('result-title').className = "text-2xl font-bold text-red-600 mb-2";
+                // Si es un error controlado o aviso
+                container.className = "w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6";
+                icon.setAttribute('data-lucide', 'alert-circle');
+                document.getElementById('result-title').className = "text-2xl font-bold text-amber-600 mb-2";
             }
             modal.classList.replace('hidden', 'flex');
             lucide.createIcons();
