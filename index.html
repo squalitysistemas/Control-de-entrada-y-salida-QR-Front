@@ -405,6 +405,7 @@
                 // Ocultamos la carga para mostrar el modal de decisión
                 setLoading(false);
 
+                // Aquí usamos el nuevo formato: data.nombre
                 if (res.ok && data.nombre) {
                     showNameConfirmation(data.nombre);
                 } else {
@@ -445,8 +446,9 @@
                 setLoading(false);
 
                 if (res.ok) {
-                    // Retornamos el mensaje exacto del servidor (Entrada registrada exitosamente...)
-                    showFinalResult(true, "¡Registrado!", data.message || `Registro exitoso para ${nombre}`);
+                    // Mostramos el mensaje exacto que regresa tu servidor: 
+                    // "Entrada registrada exitosamente del empleado : tatata"
+                    showFinalResult(true, "¡Registrado!", data.message || data.resultado || `Registro exitoso para ${nombre}`);
                 } else {
                     showFinalResult(false, "Error de Registro", data.message || "No se pudo validar la asistencia en este momento.");
                 }
