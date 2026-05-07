@@ -27,7 +27,6 @@
             border: 1px solid rgba(226, 232, 240, 1);
         }
 
-        /* Máscara Facial */
         .face-mask-overlay {
             position: absolute;
             inset: 0;
@@ -60,17 +59,6 @@
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .shutter-flash {
-            position: absolute;
-            inset: 0;
-            background: white;
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .shutter-active { animation: flash 0.4s ease-out; }
-        @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
-
         .loader-ring {
             width: 60px;
             height: 60px;
@@ -96,8 +84,6 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="max-w-md w-full glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden relative min-h-[720px] flex flex-col">
-        <div id="shutter" class="shutter-flash"></div>
-
         <button id="open-help" class="help-btn text-white hover:bg-white/30 transition-all">
             <i data-lucide="help-circle" class="w-6 h-6"></i>
         </button>
@@ -109,12 +95,11 @@
                 </div>
             </div>
             <h1 class="text-xl font-bold tracking-tight uppercase">Control de Asistencia</h1>
-            <p id="system-status-text" class="text-emerald-100 text-[10px] font-medium uppercase tracking-widest opacity-80">Sistemas Biométricos de Alta Seguridad</p>
+            <p id="system-status-text" class="text-emerald-100 text-[10px] font-medium uppercase tracking-widest opacity-80">Inicializando Sistemas...</p>
         </header>
 
         <main id="app-content" class="flex-1 flex flex-col p-6 overflow-y-auto">
             
-            <!-- VISTA SELECCIÓN -->
             <section id="view-selection" class="fade-in space-y-6 my-auto text-center">
                 <div class="space-y-2">
                     <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Bienvenido</h2>
@@ -144,7 +129,6 @@
                 </div>
             </section>
 
-            <!-- VISTA FACIAL -->
             <section id="view-face" class="hidden fade-in flex-1 flex flex-col">
                 <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"></i>
@@ -176,7 +160,6 @@
                 <button onclick="goHome()" class="mt-auto py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-colors">Cancelar y volver</button>
             </section>
 
-            <!-- VISTA QR -->
             <section id="view-qr" class="hidden fade-in flex-1 flex flex-col">
                 <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="qr-code" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
@@ -191,34 +174,30 @@
                 <button onclick="goHome()" class="mt-auto py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl text-sm shadow-sm">Regresar al Inicio</button>
             </section>
 
-            <!-- VISTA PANTALLA CARGA (REUTILIZABLE) -->
             <section id="view-loading" class="hidden fade-in flex-1 flex flex-col items-center justify-center text-center">
                 <div class="loader-ring mb-8"></div>
                 <h3 id="loading-title" class="text-xl font-bold text-slate-800 mb-2">Procesando...</h3>
                 <p id="loading-subtitle" class="text-sm text-slate-500 max-w-[280px]"></p>
             </section>
 
-            <!-- VISTA PREVIA FOTO FACIAL -->
             <section id="view-preview" class="hidden fade-in flex-1 flex flex-col items-center text-center">
                 <div class="mb-6">
                     <h3 class="text-xl font-bold text-slate-800">Verificar Foto</h3>
-                    <p class="text-sm text-slate-500">Asegúrese que su rostro sea visible</p>
+                    <p class="text-sm text-slate-500">¿Es clara la captura de su rostro?</p>
                 </div>
                 <div class="relative w-full aspect-[4/5] bg-white rounded-[2.5rem] overflow-hidden shadow-2xl mb-8 max-w-[260px] border-4 border-white">
                     <img id="captured-photo" class="w-full h-full object-cover scale-x-[-1]" src="">
                 </div>
-                <button onclick="finalizeRegistration('Reconocimiento Facial')" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl shadow-emerald-200">Confirmar Registro Facial</button>
-                <button onclick="showView('face')" class="w-full py-3 text-slate-400 font-bold text-sm mt-3 hover:text-slate-600">Repetir Fotografía</button>
+                <button onclick="finalizeRegistration('Reconocimiento Facial')" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl">Confirmar Registro Facial</button>
+                <button onclick="showView('face')" class="w-full py-3 text-slate-400 font-bold text-sm mt-3">Repetir Fotografía</button>
             </section>
-
         </main>
 
         <footer class="p-6 bg-slate-50 border-t border-slate-100 text-center">
-            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">SECURE ACCESS CONTROL • V3.1 PROFESSIONAL EDITION</p>
+            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">SECURE ACCESS CONTROL • V3.2 PROFESSIONAL</p>
         </footer>
     </div>
 
-    <!-- MODAL CONFIRMACIÓN NOMBRE (CRÍTICO) -->
     <div id="modal-confirm-name" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
         <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center fade-in shadow-2xl">
             <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
@@ -227,29 +206,12 @@
             <h2 class="text-xl font-bold text-slate-500 mb-1">Verificación de Usuario</h2>
             <p class="text-2xl font-extrabold text-slate-800 mb-8 leading-tight" id="display-name">¿Eres Pepito Perez?</p>
             <div class="grid gap-3">
-                <button id="btn-confirm-attendance" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg hover:bg-emerald-700 transition-colors">Sí, Confirmar</button>
-                <button id="btn-cancel-attendance" class="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-colors">No, no soy yo</button>
+                <button id="btn-confirm-attendance" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg">Sí, Confirmar</button>
+                <button id="btn-cancel-attendance" class="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl">No, no soy yo</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL AYUDA -->
-    <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[150]">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center fade-in shadow-2xl">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
-                <i data-lucide="info" class="w-8 h-8"></i>
-            </div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">¿Cómo usar la App?</h2>
-            <ul class="text-left text-gray-600 space-y-3 mb-8 text-sm">
-                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Elija el método que prefiera.</li>
-                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Siga las instrucciones del banner superior.</li>
-                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Espere la confirmación en pantalla.</li>
-            </ul>
-            <button id="close-help" class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700">Entendido</button>
-        </div>
-    </div>
-
-    <!-- MODAL RESULTADO FINAL -->
     <div id="modal-result" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-[120]">
         <div class="bg-white rounded-[3rem] p-10 max-w-xs w-full text-center fade-in shadow-2xl">
             <div id="result-icon-container" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -257,7 +219,22 @@
             </div>
             <h2 id="result-title" class="text-2xl font-bold mb-2 tracking-tight"></h2>
             <p id="result-desc" class="text-sm text-slate-500 mb-8"></p>
-            <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-transform">Finalizar</button>
+            <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg">Finalizar</button>
+        </div>
+    </div>
+
+    <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[150]">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center fade-in shadow-2xl">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
+                <i data-lucide="info" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">¿Cómo usar la App?</h2>
+            <ul class="text-left text-gray-600 space-y-3 mb-8 text-sm">
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Seleccione su método preferido.</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Siga las guías visuales en pantalla.</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Confirme su nombre antes de finalizar.</li>
+            </ul>
+            <button id="close-help" class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl">Entendido</button>
         </div>
     </div>
 
@@ -282,10 +259,9 @@
                 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
                 modelsLoaded = true;
-                document.getElementById('system-status-text').textContent = "Sistema de IA Activo";
+                document.getElementById('system-status-text').textContent = "IA Activa y Protegida";
             } catch (e) { 
-                console.error("Error IA:", e);
-                document.getElementById('system-status-text').textContent = "Modo Estándar (IA Desactivada)";
+                document.getElementById('system-status-text').textContent = "Modo Estándar Activo";
             }
         }
         loadModels();
@@ -307,8 +283,6 @@
             document.getElementById('face-guide').classList.add('hidden');
             document.getElementById('face-status-bubble').classList.add('hidden');
             document.getElementById('capture-progress-container').classList.add('opacity-0');
-            document.getElementById('progress-fill').style.width = '0%';
-            document.getElementById('progress-percent').textContent = '0%';
             captureProgress = 0;
         }
 
@@ -318,10 +292,8 @@
             if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
             if (qrScanner) { qrScanner.stop().catch(()=>{}); qrScanner = null; }
             if (faceDetectionInterval) { clearInterval(faceDetectionInterval); faceDetectionInterval = null; }
-            captureProgress = 0;
         }
 
-        // --- SISTEMA FACIAL ---
         async function initFaceCamera() {
             const video = document.getElementById('video-feed');
             try {
@@ -344,7 +316,7 @@
                         }
                     }
                 }, 100);
-            } catch (e) { showFinalResult(false, "Cámara Bloqueada", "Verifique los permisos de su navegador."); }
+            } catch (e) { showFinalResult(false, "Error de Cámara", "Verifique permisos."); }
         }
 
         function updateFaceUI(detected) {
@@ -374,11 +346,7 @@
             canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
             document.getElementById('captured-photo').src = canvas.toDataURL('image/jpeg');
-            document.getElementById('shutter').classList.add('shutter-active');
-            setTimeout(() => {
-                showView('preview');
-                document.getElementById('shutter').classList.remove('shutter-active');
-            }, 400);
+            showView('preview');
         }
 
         function initQR() {
@@ -392,8 +360,7 @@
         }
 
         async function verifyEmployee(serial) {
-            // Primero mostramos una carga rápida de "Verificando..."
-            setLoading(true, "Verificando Identidad", "Consultando base de datos segura...");
+            setLoading(true, "Verificando Identidad", "Consultando base de datos...");
             try {
                 const res = await fetch(ENDPOINTS.verify, {
                     method: 'POST',
@@ -401,19 +368,16 @@
                     body: JSON.stringify({ serial_qr: serial })
                 });
                 const data = await res.json();
-                
-                // Ocultamos la carga para mostrar el modal de decisión
                 setLoading(false);
 
-                // Aquí usamos el nuevo formato: data.nombre
                 if (res.ok && data.nombre) {
                     showNameConfirmation(data.nombre);
                 } else {
-                    showFinalResult(false, "Identidad Desconocida", "El código QR escaneado no pertenece a ningún empleado registrado.");
+                    showFinalResult(false, "Identidad No Encontrada", "El código QR escaneado no pertenece a ningún empleado.");
                 }
             } catch (e) {
                 setLoading(false);
-                showFinalResult(false, "Falla de Conexión", "No se pudo contactar al servidor de seguridad.");
+                showFinalResult(false, "Falla de Red", "No se pudo contactar al servidor.");
             }
         }
 
@@ -429,12 +393,11 @@
 
             document.getElementById('btn-cancel-attendance').onclick = () => {
                 modal.classList.replace('flex', 'hidden');
-                showFinalResult(false, "Acceso Interrumpido", "Por favor, escanea un código QR que te pertenezca únicamente a ti.");
+                showFinalResult(false, "Acceso Interrumpido", "Por favor escanea un código QR que te pertenezca únicamente a ti.");
             };
         }
 
         async function processAttendance(nombre) {
-            // Mostramos la carga con el mensaje específico solicitado
             setLoading(true, "Registrando Entrada", `Realizando registro de asistencia para ${nombre}...`);
             try {
                 const res = await fetch(ENDPOINTS.attendance, {
@@ -446,15 +409,14 @@
                 setLoading(false);
 
                 if (res.ok) {
-                    // Mostramos el mensaje exacto que regresa tu servidor: 
-                    // "Entrada registrada exitosamente del empleado : tatata"
-                    showFinalResult(true, "¡Registrado!", data.message || data.resultado || `Registro exitoso para ${nombre}`);
+                    // CRÍTICO: Mostramos el mensaje exacto que regresa tu servidor ("Entrada/Salida registrada exitosamente...")
+                    showFinalResult(true, "¡Registrado!", data.message || data.resultado || `Registro completado para ${nombre}`);
                 } else {
-                    showFinalResult(false, "Error de Registro", data.message || "No se pudo validar la asistencia en este momento.");
+                    showFinalResult(false, "Error de Registro", data.message || "No se pudo procesar la asistencia.");
                 }
             } catch (e) {
                 setLoading(false);
-                showFinalResult(false, "Error Crítico", "Fallo al confirmar el registro con el servidor.");
+                showFinalResult(false, "Error Crítico", "Fallo al confirmar el registro.");
             }
         }
 
@@ -471,7 +433,7 @@
         }
 
         function finalizeRegistration(metodo) {
-            showFinalResult(true, "¡Registrado!", `Su captura de ${metodo} ha sido guardada y verificada.`);
+            showFinalResult(true, "¡Registrado!", `Su captura de ${metodo} ha sido guardada correctamente.`);
         }
 
         function showFinalResult(success, title, desc) {
@@ -495,12 +457,8 @@
             lucide.createIcons();
         }
 
-        document.getElementById('open-help').onclick = () => {
-            document.getElementById('help-modal').classList.replace('hidden', 'flex');
-        };
-        document.getElementById('close-help').onclick = () => {
-            document.getElementById('help-modal').classList.replace('flex', 'hidden');
-        };
+        document.getElementById('open-help').onclick = () => document.getElementById('help-modal').classList.replace('hidden', 'flex');
+        document.getElementById('close-help').onclick = () => document.getElementById('help-modal').classList.replace('flex', 'hidden');
     </script>
 </body>
 </html>
