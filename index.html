@@ -20,7 +20,6 @@
             font-family: 'Inter', sans-serif;
             background-color: #f1f5f9;
             color: #1e293b;
-            overflow: hidden;
         }
 
         .glass-panel {
@@ -28,6 +27,7 @@
             border: 1px solid rgba(226, 232, 240, 1);
         }
 
+        /* Máscara Facial */
         .face-mask-overlay {
             position: absolute;
             inset: 0;
@@ -57,7 +57,7 @@
             transform: translate(-50%, -50%) scale(1.05);
         }
 
-        /* Animaciones y Efectos */
+        /* Animaciones */
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -72,6 +72,7 @@
         .shutter-active { animation: flash 0.4s ease-out; }
         @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
 
+        /* Estilos QR personalizado para la librería */
         #qr-reader { border: none !important; }
         #qr-reader__scan_region { background: #0f172a !important; }
         #qr-reader__dashboard_section_csr button {
@@ -83,34 +84,49 @@
         }
 
         .loader-ring {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 5px solid #e2e8f0;
             border-bottom-color: #10b981;
             border-radius: 50%;
             animation: rotation 1s linear infinite;
         }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .help-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            z-index: 30;
+            transition: all 0.2s;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-md w-full glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden relative min-h-[700px] flex flex-col">
+    <div class="max-w-md w-full glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden relative min-h-[720px] flex flex-col">
         <div id="shutter" class="shutter-flash"></div>
 
-        <header class="bg-emerald-600 p-6 text-white text-center shrink-0 shadow-lg">
-            <div class="flex justify-center mb-2">
-                <div class="p-2 bg-white/20 rounded-xl">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+        <!-- Botón de Ayuda -->
+        <button id="open-help" class="help-btn text-white hover:bg-white/30 transition-all">
+            <i data-lucide="help-circle" class="w-6 h-6"></i>
+        </button>
+
+        <header class="bg-emerald-600 p-8 text-white text-center shrink-0 shadow-lg">
+            <div class="flex justify-center mb-3">
+                <div class="p-3 bg-white/20 rounded-2xl">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
                 </div>
             </div>
-            <h1 class="text-lg font-bold tracking-tight uppercase">Control de Asistencia</h1>
-            <p id="system-status-text" class="text-emerald-100 text-[10px] font-medium uppercase tracking-widest opacity-80">Sistemas Biométricos Activos</p>
+            <h1 class="text-xl font-bold tracking-tight uppercase">Control de Asistencia</h1>
+            <p id="system-status-text" class="text-emerald-100 text-[10px] font-medium uppercase tracking-widest opacity-80">Sistemas Biométricos de Alta Seguridad</p>
         </header>
 
         <main id="app-content" class="flex-1 flex flex-col p-6 overflow-y-auto">
             
-            <!-- PANTALLA 1: SELECCIÓN -->
             <section id="view-selection" class="fade-in space-y-6 my-auto text-center">
                 <div class="space-y-2">
                     <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Bienvenido</h2>
@@ -123,8 +139,8 @@
                             <i data-lucide="scan-face" class="w-7 h-7"></i>
                         </div>
                         <div class="ml-4 text-left">
-                            <span class="block font-bold text-slate-800">Biometría Facial</span>
-                            <span class="text-xs text-slate-400">Detección de puntos faciales</span>
+                            <span class="block font-bold text-slate-800 text-base">Reconocimiento Facial</span>
+                            <span class="text-[11px] text-slate-400">Captura de biometría facial en vivo</span>
                         </div>
                     </button>
 
@@ -133,86 +149,127 @@
                             <i data-lucide="qr-code" class="w-7 h-7"></i>
                         </div>
                         <div class="ml-4 text-left">
-                            <span class="block font-bold text-slate-800">Escaneo QR</span>
-                            <span class="text-xs text-slate-400">Verificación de credencial</span>
+                            <span class="block font-bold text-slate-800 text-base">Escaneo de Código QR</span>
+                            <span class="text-[11px] text-slate-400">Validación rápida mediante carnet</span>
                         </div>
                     </button>
                 </div>
             </section>
 
             <section id="view-face" class="hidden fade-in flex-1 flex flex-col">
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"></i>
+                    <p class="text-[11px] text-blue-800 leading-relaxed">
+                        <b>Instrucciones:</b> Ubíquese en un lugar iluminado, mire de frente y asegúrese de que su rostro esté dentro del óvalo guía.
+                    </p>
+                </div>
+
                 <div class="relative w-full aspect-[4/5] bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl mb-6 flex flex-col items-center justify-center">
                     <video id="video-feed" class="absolute inset-0 w-full h-full object-cover scale-x-[-1]" autoplay playsinline></video>
                     <div id="face-ui-overlay" class="face-mask-overlay hidden"></div>
                     <div id="face-guide" class="face-guide hidden"></div>
-                    <button id="face-start-btn" onclick="initFaceCamera()" class="relative z-20 px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl">Iniciar Reconocimiento</button>
                     
-                    <div id="face-status-bubble" class="hidden absolute bottom-6 bg-black/70 backdrop-blur-md text-white px-5 py-2 rounded-full text-[10px] font-bold z-20 flex items-center gap-2">
+                    <button id="face-start-btn" onclick="initFaceCamera()" class="relative z-20 px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:scale-105 transition-transform">
+                        Iniciar Reconocimiento
+                    </button>
+                    
+                    <div id="face-status-bubble" class="hidden absolute bottom-6 bg-black/70 backdrop-blur-md text-white px-5 py-2.5 rounded-full text-[10px] font-bold z-20 flex items-center gap-2 border border-white/10">
                         <span id="face-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                         <span id="face-text">BUSCANDO ROSTRO</span>
                     </div>
                 </div>
-                <div id="capture-progress-container" class="space-y-2 opacity-0">
+
+                <div id="capture-progress-container" class="space-y-3 opacity-0 transition-opacity">
+                    <div class="flex justify-between items-end">
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Analizando facciones...</span>
+                        <span id="progress-percent" class="text-xs font-mono text-slate-500">0%</span>
+                    </div>
                     <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
                         <div id="progress-fill" class="h-full bg-emerald-500 w-0 transition-all duration-100"></div>
                     </div>
                 </div>
-                <button onclick="goHome()" class="mt-auto py-3 text-slate-400 font-bold text-sm uppercase">Cancelar</button>
+                <button onclick="goHome()" class="mt-auto py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-colors">Cancelar y volver</button>
             </section>
 
             <section id="view-qr" class="hidden fade-in flex-1 flex flex-col">
+                <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
+                    <i data-lucide="qr-code" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+                    <p class="text-[11px] text-emerald-800 leading-relaxed">
+                        <b>Instrucciones:</b> Centre el código QR de su credencial dentro del recuadro. El sistema lo identificará automáticamente.
+                    </p>
+                </div>
+
                 <div class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 border-4 border-white">
                     <div id="qr-reader" class="w-full h-full"></div>
                 </div>
-                <button onclick="goHome()" class="mt-auto py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl">Volver</button>
+                <button onclick="goHome()" class="mt-auto py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl text-sm shadow-sm">Regresar al Inicio</button>
             </section>
 
             <section id="view-loading" class="hidden fade-in flex-1 flex flex-col items-center justify-center text-center">
-                <div class="loader-ring mb-6"></div>
+                <div class="loader-ring mb-8"></div>
                 <h3 id="loading-title" class="text-xl font-bold text-slate-800 mb-2">Procesando...</h3>
-                <p id="loading-subtitle" class="text-sm text-slate-500 max-w-[250px]"></p>
+                <p id="loading-subtitle" class="text-sm text-slate-500 max-w-[280px]"></p>
             </section>
 
-            <section id="view-preview" class="hidden fade-in flex-1 flex flex-col items-center">
+            <section id="view-preview" class="hidden fade-in flex-1 flex flex-col items-center text-center">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-slate-800">Verificar Foto</h3>
+                    <p class="text-sm text-slate-500">Asegúrese que su rostro sea visible</p>
+                </div>
                 <div class="relative w-full aspect-[4/5] bg-white rounded-[2.5rem] overflow-hidden shadow-2xl mb-8 max-w-[260px] border-4 border-white">
                     <img id="captured-photo" class="w-full h-full object-cover scale-x-[-1]" src="">
                 </div>
-                <button onclick="finalizeRegistration('Reconocimiento Facial')" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl">Confirmar Registro Facial</button>
-                <button onclick="showView('face')" class="w-full py-3 text-slate-400 font-bold text-sm mt-2">Repetir</button>
+                <button onclick="finalizeRegistration('Reconocimiento Facial')" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl shadow-emerald-200">Confirmar Registro Facial</button>
+                <button onclick="showView('face')" class="w-full py-3 text-slate-400 font-bold text-sm mt-3 hover:text-slate-600">Repetir Fotografía</button>
             </section>
 
         </main>
 
-        <footer class="p-4 bg-slate-50 border-t border-slate-100 text-center">
-            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest">SECURE ACCESS CONTROL • V3.0</p>
+        <footer class="p-6 bg-slate-50 border-t border-slate-100 text-center">
+            <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">SECURE ACCESS CONTROL • V3.1 PROFESSIONAL EDITION</p>
         </footer>
     </div>
 
-    
     <!-- Modal Confirmar Nombre QR -->
     <div id="modal-confirm-name" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
         <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center fade-in shadow-2xl">
             <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
                 <i data-lucide="user" class="w-10 h-10"></i>
             </div>
-            <h2 class="text-xl font-bold text-slate-500 mb-1">Verificación</h2>
-            <p class="text-2xl font-extrabold text-slate-800 mb-8" id="display-name">¿Eres Pepito Perez?</p>
+            <h2 class="text-xl font-bold text-slate-500 mb-1">Verificación de Usuario</h2>
+            <p class="text-2xl font-extrabold text-slate-800 mb-8 leading-tight" id="display-name">¿Eres Pepito Perez?</p>
             <div class="grid gap-3">
-                <button id="btn-confirm-attendance" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg">Confirmar</button>
-                <button id="btn-cancel-attendance" class="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl">No soy yo</button>
+                <button id="btn-confirm-attendance" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg hover:bg-emerald-700 transition-colors">Sí, Confirmar</button>
+                <button id="btn-cancel-attendance" class="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-colors">No, no soy yo</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Resultado Final -->
-    <div id="modal-result" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-[110]">
-        <div class="bg-white rounded-[3rem] p-10 max-w-xs w-full text-center fade-in shadow-2xl">
-            <div id="result-icon-container" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i id="result-icon" data-lucide="check" class="w-8 h-8"></i>
+    <!-- Modal Ayuda -->
+    <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[150]">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center fade-in shadow-2xl">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
+                <i data-lucide="info" class="w-8 h-8"></i>
             </div>
-            <h2 id="result-title" class="text-xl font-bold mb-2"></h2>
-            <p id="result-desc" class="text-sm text-slate-500 mb-6"></p>
-            <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white font-bold rounded-2xl">Finalizar</button>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">¿Cómo usar la App?</h2>
+            <ul class="text-left text-gray-600 space-y-3 mb-8 text-sm">
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Elija el método que prefiera.</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Siga las instrucciones del banner superior.</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Espere la confirmación en pantalla.</li>
+            </ul>
+            <button id="close-help" class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Modal Resultado Final -->
+    <div id="modal-result" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-[120]">
+        <div class="bg-white rounded-[3rem] p-10 max-w-xs w-full text-center fade-in shadow-2xl">
+            <div id="result-icon-container" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i id="result-icon" data-lucide="check" class="w-10 h-10"></i>
+            </div>
+            <h2 id="result-title" class="text-2xl font-bold mb-2 tracking-tight"></h2>
+            <p id="result-desc" class="text-sm text-slate-500 mb-8"></p>
+            <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-transform">Finalizar</button>
         </div>
     </div>
 
@@ -237,17 +294,34 @@
                 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
                 modelsLoaded = true;
-                document.getElementById('system-status-text').textContent = "Modelos IA Cargados";
-            } catch (e) { console.error("Error IA:", e); }
+                document.getElementById('system-status-text').textContent = "Sistema de IA Activo";
+            } catch (e) { 
+                console.error("Error IA:", e);
+                document.getElementById('system-status-text').textContent = "Modo Estándar (IA Desactivada)";
+            }
         }
         loadModels();
 
         function showView(viewId) {
             stopAllSystems();
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) target.classList.remove('hidden');
+            
             if (viewId === 'qr') initQR();
+            if (viewId === 'face') resetFaceView();
             lucide.createIcons();
+        }
+
+        function resetFaceView() {
+            document.getElementById('face-start-btn').classList.remove('hidden');
+            document.getElementById('face-ui-overlay').classList.add('hidden');
+            document.getElementById('face-guide').classList.add('hidden');
+            document.getElementById('face-status-bubble').classList.add('hidden');
+            document.getElementById('capture-progress-container').classList.add('opacity-0');
+            document.getElementById('progress-fill').style.width = '0%';
+            document.getElementById('progress-percent').textContent = '0%';
+            captureProgress = 0;
         }
 
         function goHome() { showView('selection'); }
@@ -262,7 +336,7 @@
         async function initFaceCamera() {
             const video = document.getElementById('video-feed');
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
                 video.srcObject = stream;
                 document.getElementById('face-start-btn').classList.add('hidden');
                 document.getElementById('face-ui-overlay').classList.remove('hidden');
@@ -281,7 +355,7 @@
                         }
                     }
                 }, 100);
-            } catch (e) { showFinalResult(false, "Error de Cámara", "No se pudo acceder al hardware de video."); }
+            } catch (e) { showFinalResult(false, "Cámara Bloqueada", "Verifique los permisos de su navegador."); }
         }
 
         function updateFaceUI(detected) {
@@ -289,18 +363,20 @@
             const indicator = document.getElementById('face-indicator');
             const text = document.getElementById('face-text');
             const fill = document.getElementById('progress-fill');
+            const perc = document.getElementById('progress-percent');
 
             if (detected) {
                 guide.classList.add('active');
-                indicator.className = "w-2 h-2 rounded-full bg-emerald-500";
+                indicator.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
                 text.textContent = "ROSTRO IDENTIFICADO";
             } else {
                 guide.classList.remove('active');
                 indicator.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
                 text.textContent = "BUSCANDO ROSTRO";
-                captureProgress = Math.max(0, captureProgress - 1);
+                captureProgress = Math.max(0, captureProgress - 1.5);
             }
             fill.style.width = `${captureProgress}%`;
+            perc.textContent = `${Math.floor(captureProgress)}%`;
         }
 
         function takePhoto() {
@@ -318,7 +394,7 @@
 
         function initQR() {
             qrScanner = new Html5Qrcode("qr-reader");
-            const config = { fps: 20, qrbox: { width: 300, height: 300 } };
+            const config = { fps: 25, qrbox: { width: 300, height: 300 } };
             qrScanner.start({ facingMode: "environment" }, config, async (text) => {
                 currentSerial = text;
                 await qrScanner.stop();
@@ -327,7 +403,7 @@
         }
 
         async function verifyEmployee(serial) {
-            setLoading(true, "Verificando...", "Consultando identidad en el servidor");
+            setLoading(true, "Verificando Identidad", "Consultando base de datos segura...");
             try {
                 const res = await fetch(ENDPOINTS.verify, {
                     method: 'POST',
@@ -340,11 +416,11 @@
                 if (res.ok && data.nombre) {
                     showNameConfirmation(data.nombre);
                 } else {
-                    showFinalResult(false, "Error de Identidad", "El QR escaneado no pertenece a ningún empleado registrado.");
+                    showFinalResult(false, "Identidad Desconocida", "El código QR escaneado no está registrado en el sistema.");
                 }
             } catch (e) {
                 setLoading(false);
-                showFinalResult(false, "Falla de Red", "No se pudo contactar al servicio de verificación.");
+                showFinalResult(false, "Falla de Conexión", "No se pudo contactar al servidor de seguridad.");
             }
         }
 
@@ -360,12 +436,12 @@
 
             document.getElementById('btn-cancel-attendance').onclick = () => {
                 modal.classList.replace('flex', 'hidden');
-                showFinalResult(false, "Acceso Denegado", "Por favor escanea un código QR que te pertenezca únicamente a ti.");
+                showFinalResult(false, "Acceso Interrumpido", "Por favor, escanea un código QR que te pertenezca únicamente a ti.");
             };
         }
 
         async function processAttendance(nombre) {
-            setLoading(true, "Registrando...", `Realizando registro de asistencia para ${nombre}`);
+            setLoading(true, "Registrando Entrada", `Iniciando proceso de asistencia para ${nombre}...`);
             try {
                 const res = await fetch(ENDPOINTS.attendance, {
                     method: 'POST',
@@ -376,13 +452,13 @@
                 setLoading(false);
 
                 if (res.ok) {
-                    showFinalResult(true, "¡Éxito!", data.message || `Registro completado para ${nombre}`);
+                    showFinalResult(true, "Registro Exitoso", data.message || `Acceso permitido para ${nombre}`);
                 } else {
-                    showFinalResult(false, "Fallo en Registro", data.message || "No se pudo procesar la asistencia.");
+                    showFinalResult(false, "Error de Registro", data.message || "No se pudo validar la asistencia en este momento.");
                 }
             } catch (e) {
                 setLoading(false);
-                showFinalResult(false, "Error Crítico", "Falla en la comunicación final.");
+                showFinalResult(false, "Error Crítico", "Fallo al confirmar el registro con el servidor.");
             }
         }
 
@@ -396,7 +472,7 @@
         }
 
         function finalizeRegistration(metodo) {
-            showFinalResult(true, "¡Registrado!", `Su registro mediante ${metodo} ha sido guardado exitosamente.`);
+            showFinalResult(true, "¡Registrado!", `Su captura de ${metodo} ha sido guardada y verificada.`);
         }
 
         function showFinalResult(success, title, desc) {
@@ -408,17 +484,25 @@
             document.getElementById('result-desc').textContent = desc;
 
             if (success) {
-                container.className = "w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4";
+                container.className = "w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6";
                 icon.setAttribute('data-lucide', 'check');
-                document.getElementById('result-title').className = "text-xl font-bold text-emerald-600 mb-2";
+                document.getElementById('result-title').className = "text-2xl font-bold text-emerald-600 mb-2";
             } else {
-                container.className = "w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4";
+                container.className = "w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6";
                 icon.setAttribute('data-lucide', 'x-circle');
-                document.getElementById('result-title').className = "text-xl font-bold text-red-600 mb-2";
+                document.getElementById('result-title').className = "text-2xl font-bold text-red-600 mb-2";
             }
             modal.classList.replace('hidden', 'flex');
             lucide.createIcons();
         }
+
+        // Help Modal Events
+        document.getElementById('open-help').onclick = () => {
+            document.getElementById('help-modal').classList.replace('hidden', 'flex');
+        };
+        document.getElementById('close-help').onclick = () => {
+            document.getElementById('help-modal').classList.replace('flex', 'hidden');
+        };
     </script>
 </body>
 </html>
