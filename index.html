@@ -57,7 +57,6 @@
             transform: translate(-50%, -50%) scale(1.05);
         }
 
-        /* Animaciones */
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -71,17 +70,6 @@
         }
         .shutter-active { animation: flash 0.4s ease-out; }
         @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
-
-        /* Estilos QR personalizado para la librería */
-        #qr-reader { border: none !important; }
-        #qr-reader__scan_region { background: #0f172a !important; }
-        #qr-reader__dashboard_section_csr button {
-            background-color: #10b981 !important;
-            color: white !important;
-            border-radius: 12px !important;
-            padding: 10px 20px !important;
-            font-weight: 600 !important;
-        }
 
         .loader-ring {
             width: 60px;
@@ -110,7 +98,6 @@
     <div class="max-w-md w-full glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden relative min-h-[720px] flex flex-col">
         <div id="shutter" class="shutter-flash"></div>
 
-        <!-- Botón de Ayuda -->
         <button id="open-help" class="help-btn text-white hover:bg-white/30 transition-all">
             <i data-lucide="help-circle" class="w-6 h-6"></i>
         </button>
@@ -127,6 +114,7 @@
 
         <main id="app-content" class="flex-1 flex flex-col p-6 overflow-y-auto">
             
+            <!-- VISTA SELECCIÓN -->
             <section id="view-selection" class="fade-in space-y-6 my-auto text-center">
                 <div class="space-y-2">
                     <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Bienvenido</h2>
@@ -156,6 +144,7 @@
                 </div>
             </section>
 
+            <!-- VISTA FACIAL -->
             <section id="view-face" class="hidden fade-in flex-1 flex flex-col">
                 <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"></i>
@@ -168,11 +157,7 @@
                     <video id="video-feed" class="absolute inset-0 w-full h-full object-cover scale-x-[-1]" autoplay playsinline></video>
                     <div id="face-ui-overlay" class="face-mask-overlay hidden"></div>
                     <div id="face-guide" class="face-guide hidden"></div>
-                    
-                    <button id="face-start-btn" onclick="initFaceCamera()" class="relative z-20 px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:scale-105 transition-transform">
-                        Iniciar Reconocimiento
-                    </button>
-                    
+                    <button id="face-start-btn" onclick="initFaceCamera()" class="relative z-20 px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:scale-105 transition-transform">Iniciar Reconocimiento</button>
                     <div id="face-status-bubble" class="hidden absolute bottom-6 bg-black/70 backdrop-blur-md text-white px-5 py-2.5 rounded-full text-[10px] font-bold z-20 flex items-center gap-2 border border-white/10">
                         <span id="face-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                         <span id="face-text">BUSCANDO ROSTRO</span>
@@ -191,6 +176,7 @@
                 <button onclick="goHome()" class="mt-auto py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-colors">Cancelar y volver</button>
             </section>
 
+            <!-- VISTA QR -->
             <section id="view-qr" class="hidden fade-in flex-1 flex flex-col">
                 <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="qr-code" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
@@ -205,12 +191,14 @@
                 <button onclick="goHome()" class="mt-auto py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl text-sm shadow-sm">Regresar al Inicio</button>
             </section>
 
+            <!-- VISTA PANTALLA CARGA (REUTILIZABLE) -->
             <section id="view-loading" class="hidden fade-in flex-1 flex flex-col items-center justify-center text-center">
                 <div class="loader-ring mb-8"></div>
                 <h3 id="loading-title" class="text-xl font-bold text-slate-800 mb-2">Procesando...</h3>
                 <p id="loading-subtitle" class="text-sm text-slate-500 max-w-[280px]"></p>
             </section>
 
+            <!-- VISTA PREVIA FOTO FACIAL -->
             <section id="view-preview" class="hidden fade-in flex-1 flex flex-col items-center text-center">
                 <div class="mb-6">
                     <h3 class="text-xl font-bold text-slate-800">Verificar Foto</h3>
@@ -230,7 +218,7 @@
         </footer>
     </div>
 
-    <!-- Modal Confirmar Nombre QR -->
+    <!-- MODAL CONFIRMACIÓN NOMBRE (CRÍTICO) -->
     <div id="modal-confirm-name" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
         <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center fade-in shadow-2xl">
             <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
@@ -245,7 +233,7 @@
         </div>
     </div>
 
-    <!-- Modal Ayuda -->
+    <!-- MODAL AYUDA -->
     <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[150]">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center fade-in shadow-2xl">
             <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
@@ -261,7 +249,7 @@
         </div>
     </div>
 
-    <!-- Modal Resultado Final -->
+    <!-- MODAL RESULTADO FINAL -->
     <div id="modal-result" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-[120]">
         <div class="bg-white rounded-[3rem] p-10 max-w-xs w-full text-center fade-in shadow-2xl">
             <div id="result-icon-container" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -333,6 +321,7 @@
             captureProgress = 0;
         }
 
+        // --- SISTEMA FACIAL ---
         async function initFaceCamera() {
             const video = document.getElementById('video-feed');
             try {
@@ -403,6 +392,7 @@
         }
 
         async function verifyEmployee(serial) {
+            // Primero mostramos una carga rápida de "Verificando..."
             setLoading(true, "Verificando Identidad", "Consultando base de datos segura...");
             try {
                 const res = await fetch(ENDPOINTS.verify, {
@@ -411,12 +401,14 @@
                     body: JSON.stringify({ serial_qr: serial })
                 });
                 const data = await res.json();
+                
+                // Ocultamos la carga para mostrar el modal de decisión
                 setLoading(false);
 
                 if (res.ok && data.nombre) {
                     showNameConfirmation(data.nombre);
                 } else {
-                    showFinalResult(false, "Identidad Desconocida", "El código QR escaneado no está registrado en el sistema.");
+                    showFinalResult(false, "Identidad Desconocida", "El código QR escaneado no pertenece a ningún empleado registrado.");
                 }
             } catch (e) {
                 setLoading(false);
@@ -441,7 +433,8 @@
         }
 
         async function processAttendance(nombre) {
-            setLoading(true, "Registrando Entrada", `Iniciando proceso de asistencia para ${nombre}...`);
+            // Mostramos la carga con el mensaje específico solicitado
+            setLoading(true, "Registrando Entrada", `Realizando registro de asistencia para ${nombre}...`);
             try {
                 const res = await fetch(ENDPOINTS.attendance, {
                     method: 'POST',
@@ -452,7 +445,8 @@
                 setLoading(false);
 
                 if (res.ok) {
-                    showFinalResult(true, "Registro Exitoso", data.message || `Acceso permitido para ${nombre}`);
+                    // Retornamos el mensaje exacto del servidor (Entrada registrada exitosamente...)
+                    showFinalResult(true, "¡Registrado!", data.message || `Registro exitoso para ${nombre}`);
                 } else {
                     showFinalResult(false, "Error de Registro", data.message || "No se pudo validar la asistencia en este momento.");
                 }
@@ -463,11 +457,14 @@
         }
 
         function setLoading(show, title = "", subtitle = "") {
+            const loadingView = document.getElementById('view-loading');
             if (show) {
                 document.getElementById('loading-title').textContent = title;
                 document.getElementById('loading-subtitle').textContent = subtitle;
                 document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-                document.getElementById('view-loading').classList.remove('hidden');
+                loadingView.classList.remove('hidden');
+            } else {
+                loadingView.classList.add('hidden');
             }
         }
 
@@ -496,7 +493,6 @@
             lucide.createIcons();
         }
 
-        // Help Modal Events
         document.getElementById('open-help').onclick = () => {
             document.getElementById('help-modal').classList.replace('hidden', 'flex');
         };
