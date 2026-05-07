@@ -100,6 +100,7 @@
 
         <main id="app-content" class="flex-1 flex flex-col p-6 overflow-y-auto">
             
+            <!-- SECCIÓN: SELECCIÓN -->
             <section id="view-selection" class="fade-in space-y-6 my-auto text-center">
                 <div class="space-y-2">
                     <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Bienvenido</h2>
@@ -164,7 +165,7 @@
                 <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="qr-code" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
                     <p class="text-[11px] text-emerald-800 leading-relaxed">
-                        <b>Instrucciones:</b> Centre el código QR de su credencial dentro del recuadro. El sistema lo identificará automáticamente.
+                        <b>Instrucciones:</b> Centre el código QR de su credencial dentro del recuadro (300px). El sistema lo identificará automáticamente.
                     </p>
                 </div>
 
@@ -174,6 +175,7 @@
                 <button onclick="goHome()" class="mt-auto py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl text-sm shadow-sm">Regresar al Inicio</button>
             </section>
 
+            <!-- PANTALLA: CARGA DINÁMICA -->
             <section id="view-loading" class="hidden fade-in flex-1 flex flex-col items-center justify-center text-center">
                 <div class="loader-ring mb-8"></div>
                 <h3 id="loading-title" class="text-xl font-bold text-slate-800 mb-2">Procesando...</h3>
@@ -198,6 +200,7 @@
         </footer>
     </div>
 
+    <!-- MODAL: ¿ERES X PERSONA? -->
     <div id="modal-confirm-name" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
         <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center fade-in shadow-2xl">
             <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
@@ -212,6 +215,7 @@
         </div>
     </div>
 
+    <!-- MODAL: RESULTADO FINAL DINÁMICO -->
     <div id="modal-result" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-[120]">
         <div class="bg-white rounded-[3rem] p-10 max-w-xs w-full text-center fade-in shadow-2xl">
             <div id="result-icon-container" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -220,21 +224,6 @@
             <h2 id="result-title" class="text-2xl font-bold mb-2 tracking-tight"></h2>
             <p id="result-desc" class="text-sm text-slate-500 mb-8"></p>
             <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg">Finalizar</button>
-        </div>
-    </div>
-
-    <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[150]">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center fade-in shadow-2xl">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
-                <i data-lucide="info" class="w-8 h-8"></i>
-            </div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">¿Cómo usar la App?</h2>
-            <ul class="text-left text-gray-600 space-y-3 mb-8 text-sm">
-                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Seleccione su método preferido.</li>
-                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Siga las guías visuales en pantalla.</li>
-                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600 shrink-0"></i> Confirme su nombre antes de finalizar.</li>
-            </ul>
-            <button id="close-help" class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl">Entendido</button>
         </div>
     </div>
 
@@ -277,6 +266,12 @@
             lucide.createIcons();
         }
 
+        function stopAllSystems() {
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+            if (qrScanner) { qrScanner.stop().catch(()=>{}); qrScanner = null; }
+            if (faceDetectionInterval) { clearInterval(faceDetectionInterval); faceDetectionInterval = null; }
+        }
+
         function resetFaceView() {
             document.getElementById('face-start-btn').classList.remove('hidden');
             document.getElementById('face-ui-overlay').classList.add('hidden');
@@ -288,12 +283,7 @@
 
         function goHome() { showView('selection'); }
 
-        function stopAllSystems() {
-            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-            if (qrScanner) { qrScanner.stop().catch(()=>{}); qrScanner = null; }
-            if (faceDetectionInterval) { clearInterval(faceDetectionInterval); faceDetectionInterval = null; }
-        }
-
+        /* LOGICA FACIAL */
         async function initFaceCamera() {
             const video = document.getElementById('video-feed');
             try {
@@ -349,6 +339,7 @@
             showView('preview');
         }
 
+        /* LOGICA QR Y API DINÁMICA */
         function initQR() {
             qrScanner = new Html5Qrcode("qr-reader");
             const config = { fps: 25, qrbox: { width: 300, height: 300 } };
@@ -373,11 +364,11 @@
                 if (res.ok && data.nombre) {
                     showNameConfirmation(data.nombre);
                 } else {
-                    showFinalResult(false, "Identidad No Encontrada", "El código QR escaneado no pertenece a ningún empleado.");
+                    showFinalResult(false, "Identidad No Encontrada", "El código QR escaneado no pertenece a ningún empleado registrado.");
                 }
             } catch (e) {
                 setLoading(false);
-                showFinalResult(false, "Falla de Red", "No se pudo contactar al servidor.");
+                showFinalResult(false, "Falla de Red", "No se pudo contactar al servidor de verificación.");
             }
         }
 
@@ -393,7 +384,7 @@
 
             document.getElementById('btn-cancel-attendance').onclick = () => {
                 modal.classList.replace('flex', 'hidden');
-                showFinalResult(false, "Acceso Interrumpido", "Por favor escanea un código QR que te pertenezca únicamente a ti.");
+                showFinalResult(false, "Acceso Interrumpido", "Por favor, escanea un código QR que te pertenezca únicamente a ti.");
             };
         }
 
@@ -405,21 +396,23 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ serial_qr: currentSerial })
                 });
+                
+                // Obtenemos el JSON independientemente de si es 200 o 404
                 const data = await res.json();
                 setLoading(false);
 
-                // Manejamos tanto éxitos como errores controlados (ej: 404 de ya registrado)
-                const messageToShow = data.message || data.resultado || "Respuesta del sistema no disponible";
+                // EXTRAEMOS EL MENSAJE DINÁMICO (priorizamos message o resultado)
+                const messageFromServer = data.message || data.resultado || data.detail || "Respuesta del sistema no disponible";
 
                 if (res.ok) {
-                    showFinalResult(true, "¡Registrado!", messageToShow);
+                    showFinalResult(true, "¡Registro Exitoso!", messageFromServer);
                 } else {
-                    // Si el servidor retorna error (404, 400, etc.), mostramos su mensaje exacto
-                    showFinalResult(false, "Atención", messageToShow);
+                    // Si el servidor retorna error (como 404), mostramos el mensaje dinámico en el modal de advertencia
+                    showFinalResult(false, "Atención", messageFromServer);
                 }
             } catch (e) {
                 setLoading(false);
-                showFinalResult(false, "Error Crítico", "Fallo al confirmar el registro.");
+                showFinalResult(false, "Error Crítico", "Hubo un fallo al intentar procesar el registro con el servidor.");
             }
         }
 
@@ -435,10 +428,6 @@
             }
         }
 
-        function finalizeRegistration(metodo) {
-            showFinalResult(true, "¡Registrado!", `Su captura de ${metodo} ha sido guardada correctamente.`);
-        }
-
         function showFinalResult(success, title, desc) {
             const modal = document.getElementById('modal-result');
             const container = document.getElementById('result-icon-container');
@@ -452,7 +441,6 @@
                 icon.setAttribute('data-lucide', 'check');
                 document.getElementById('result-title').className = "text-2xl font-bold text-emerald-600 mb-2";
             } else {
-                // Si es un error controlado o aviso
                 container.className = "w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6";
                 icon.setAttribute('data-lucide', 'alert-circle');
                 document.getElementById('result-title').className = "text-2xl font-bold text-amber-600 mb-2";
@@ -461,8 +449,9 @@
             lucide.createIcons();
         }
 
-        document.getElementById('open-help').onclick = () => document.getElementById('help-modal').classList.replace('hidden', 'flex');
-        document.getElementById('close-help').onclick = () => document.getElementById('help-modal').classList.replace('flex', 'hidden');
+        function finalizeRegistration(metodo) {
+            showFinalResult(true, "¡Registrado!", `Su captura de ${metodo} ha sido guardada correctamente en el sistema local.`);
+        }
     </script>
 </body>
 </html>
