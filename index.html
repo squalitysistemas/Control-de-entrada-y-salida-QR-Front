@@ -249,7 +249,6 @@
 
                 if (res.ok && data.nombre) {
                     currentSerial = serial;
-                    console.log("la respuesta que obtuve al escanear el Qr fue: "+ data)
                     currentEmployeeName = data.nombre;
                     showQRConfirmation(data.nombre);
                 } else {
