@@ -86,6 +86,7 @@
 
         <main id="app-content" class="flex-1 flex flex-col p-6 overflow-y-auto">
             
+            <!-- PANTALLA 1: ESCANEO QR -->
             <section id="view-qr" class="fade-in flex-1 flex flex-col">
                 <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="qr-code" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
@@ -99,6 +100,7 @@
                 </div>
             </section>
 
+            <!-- PANTALLA 2: RECONOCIMIENTO FACIAL -->
             <section id="view-face" class="hidden fade-in flex-1 flex flex-col">
                 <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="scan-face" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"></i>
@@ -129,12 +131,14 @@
                 </div>
             </section>
 
+            <!-- PANTALLA 3: CARGA / PROCESAMIENTO -->
             <section id="view-loading" class="hidden fade-in flex-1 flex flex-col items-center justify-center text-center">
                 <div class="loader-ring mb-8"></div>
                 <h3 id="loading-title" class="text-xl font-bold text-slate-800 mb-2">Procesando...</h3>
                 <p id="loading-subtitle" class="text-sm text-slate-500 max-w-[280px]"></p>
             </section>
 
+            <!-- PANTALLA 4: PREVISUALIZACIÓN DE FOTO -->
             <section id="view-preview" class="hidden fade-in flex-1 flex flex-col items-center text-center">
                 <div class="mb-6">
                     <h3 class="text-xl font-bold text-slate-800">Verificar Foto</h3>
@@ -191,7 +195,7 @@
 
         let stream = null;
         let qrScanner = null;
-        let currentSerial = null; // Serial guardado temporalmente
+        let currentSerial = null; 
         let currentEmployeeName = "";
         let faceDetectionInterval = null;
         let captureProgress = 0;
@@ -208,7 +212,9 @@
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
                 modelsLoaded = true;
                 document.getElementById('system-status-text').textContent = "IA Activa";
-            } catch (e) { console.error("Error cargando modelos IA", e); }
+            } catch (e) { 
+                console.error("Error cargando modelos IA", e); 
+            }
         }
 
         function showView(viewId) {
@@ -225,7 +231,7 @@
         function initQR() {
             if (qrScanner) qrScanner.clear();
             qrScanner = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 300, height: 300 } };
+            const config = { fps: 15, qrbox: { width: 300, height: 300 } };
             
             qrScanner.start({ facingMode: "environment" }, config, onScanSuccess)
                 .catch(err => console.error("Error cámara QR", err));
@@ -244,6 +250,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ serial_qr: serial })
                 });
+                
                 const data = await res.json();
                 setLoading(false);
 
@@ -252,7 +259,8 @@
                     currentEmployeeName = data.nombre;
                     showQRConfirmation(data.nombre);
                 } else {
-                    showFinalResult(false, "Acceso Denegado", "El codigo Qr no pertence a ningun empleado, para acceder a la app debes tener un Qr registrado.", true);
+                    const errorDetail = data.detail || "El codigo Qr no pertence a ningun empleado, para acceder a la app debes tener un Qr registrado.";
+                    showFinalResult(false, "Acceso Denegado", errorDetail, true);
                 }
             } catch (e) {
                 setLoading(false);
@@ -276,7 +284,7 @@
             };
 
             btnCancel.onclick = () => {
-                location.reload(); // Reiniciar desde cero
+                showFinalResult(false, "Cancelado", "Por favor escanea un qr que sea tuyo.", true);
             };
         }
 
@@ -305,10 +313,15 @@
             const progressPercent = document.getElementById('progress-percent');
 
             faceDetectionInterval = setInterval(async () => {
-                if (!modelsLoaded) return;
-                const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
+                let isDetected = false;
+                if (modelsLoaded) {
+                    const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
+                    isDetected = !!detections;
+                } else {
+                    isDetected = true; // Fallback preventivo
+                }
                 
-                if (detections) {
+                if (isDetected) {
                     guide.classList.add('active');
                     indicator.className = "w-2 h-2 rounded-full bg-emerald-500";
                     statusText.textContent = "ROSTRO DETECTADO";
@@ -364,12 +377,13 @@
                 const data = await res.json();
                 setLoading(false);
 
-                const message = data.message || "Proceso completado correctamente.";
-
                 if (res.ok) {
-                    showFinalResult(true, "¡Proceso Exitoso!", message, true);
+                    const successMessage = data.message || "Proceso completado correctamente.";
+                    showFinalResult(true, "¡Proceso Exitoso!", successMessage, true);
                 } else {
-                    showFinalResult(false, "Atención", message, true);
+                    // Captura dinámica del error desde 'detail' o 'message'
+                    const errorMessage = data.detail || data.message || "No se pudo verificar la biometría.";
+                    showFinalResult(false, "Atención", errorMessage, true);
                 }
             } catch (e) {
                 setLoading(false);
@@ -378,6 +392,9 @@
         }
 
         function showFinalResult(success, title, desc, isReset = false) {
+            // Ocultar modal de confirmación si estaba abierto
+            document.getElementById('modal-confirm-name').classList.replace('flex', 'hidden');
+            
             const modal = document.getElementById('modal-result');
             const container = document.getElementById('result-icon-container');
             const icon = document.getElementById('result-icon');
