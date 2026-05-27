@@ -81,13 +81,13 @@
                 </div>
             </div>
             <h1 class="text-xl font-bold tracking-tight uppercase leading-tight">Control de Asistencia</h1>
-            <p id="system-status-text" class="text-emerald-100 text-[10px] font-medium uppercase tracking-widest opacity-80">Paso 1: Identificación QR</p>
+            <p id="system-status-text" class="text-emerald-100 text-[10px] font-medium uppercase tracking-widest opacity-80">Identificacion Facial</p>
         </header>
 
         <main id="app-content" class="flex-1 flex flex-col p-6 overflow-y-auto">
             
             <!-- PANTALLA 1: ESCANEO QR -->
-            <section id="view-qr" class="fade-in flex-1 flex flex-col">
+           <!-- <section id="view-qr" class="fade-in flex-1 flex flex-col">
                 <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
                     <i data-lucide="qr-code" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
                     <p class="text-[11px] text-emerald-800 leading-relaxed">
@@ -98,8 +98,18 @@
                 <div class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 border-4 border-white">
                     <div id="qr-reader" class="w-full h-full"></div>
                 </div>
+            </section> -->
+            <!-- ----------Reemplazo de view-qr --------------->
+            <section id="view-qr" class="fade-in flex-1 flex flex-col items-center justify-center text-center">
+                <div class="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl mb-8">
+                     <i data-lucide="scan-face" class="w-16 h-16 text-emerald-600 mx-auto mb-4"></i>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">Control de Asistencia</h2>
+                    <p class="text-sm text-slate-500">Presiona el botón para iniciar el reconocimiento facial</p>
+                </div>
+                    <button onclick="showView('face')" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:scale-105 transition-transform">
+                        Checar Asistencia
+                    </button>
             </section>
-
             <!-- PANTALLA 2: RECONOCIMIENTO FACIAL -->
             <section id="view-face" class="hidden fade-in flex-1 flex flex-col">
                 <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-5 flex items-start gap-3">
