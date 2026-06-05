@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Acceso Profesional</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script> -->
+    <!-- <script src="https://unpkg.com/lucide@latest"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script> -->
+     <script src="libs/tailwind.js"></script>
+    <script src="libs/html5-qrcode.js" type="text/javascript"></script>
+    <script src="libs/lucide.js"></script>
+    <script src="libs/face-api.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -196,12 +200,26 @@
 
     <script>
         lucide.createIcons();
+        
+        
+        //const API_BASE = "https://control-es-qr-281979635747.northamerica-south1.run.app";
+        //const API_BASE = "http://127.0.0.1:8000";
+        //const ENDPOINTS = {
+        //    verify: `${API_BASE}/api/v1/verificar/nombre/qr`,
+        //    compare: `${API_BASE}/api/v1/asistencia`
+        //};
 
-        const API_BASE = "https://control-es-qr-281979635747.northamerica-south1.run.app";
-        const ENDPOINTS = {
-            verify: `${API_BASE}/api/v1/verificar/nombre/qr`,
-            compare: `${API_BASE}/api/v1/asistencia`
-        };
+        const API_LOCAL = "http://127.0.0.1:8000";
+        const API_CLOUD = "https://control-es-qr-281979635747.northamerica-south1.run.app";
+
+        async function getApiBase() {
+            try {
+                const res = await fetch(`${API_LOCAL}/api/v1/`, { signal: AbortSignal.timeout(2000) });
+                if (res.ok) return API_LOCAL;
+            } catch (e) {}
+        return API_CLOUD;
+        }
+
 
         let stream = null;
         let qrScanner = null;
@@ -218,7 +236,8 @@
 
         async function loadModels() {
             try {
-                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+                //const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+                const MODEL_URL = 'libs/models/';
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
                 modelsLoaded = true;
                 document.getElementById('system-status-text').textContent = "IA Activa";
@@ -375,15 +394,18 @@
             setLoading(true, "Finalizando Registro", `Realizando registro de asistencia para ${currentEmployeeName}...`);
             
             try {
-                const res = await fetch(ENDPOINTS.compare, {
+                //const res = await fetch(ENDPOINTS.compare, {
+                const apiBase = await getApiBase();
+                const res = await fetch(`${apiBase}/api/v1/asistencia`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        serial_qr: currentSerial,
+                    //    serial_qr: currentSerial,
                         imagen: photoBase64
                     })
                 });
                 
+
                 const data = await res.json();
                 setLoading(false);
 
