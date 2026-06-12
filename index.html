@@ -146,15 +146,15 @@
                     </div>
                 </div>
 
-                <div id="capture-progress-container" class="space-y-3 opacity-0 transition-opacity">
-                    <div class="flex justify-between items-end">
-                        <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Analizando biometría...</span>
-                        <span id="progress-percent" class="text-xs font-mono text-slate-500">0%</span>
-                    </div>
-                    <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-                        <div id="progress-fill" class="h-full bg-emerald-500 w-0 transition-all duration-100"></div>
-                    </div>
-                </div>
+                <button
+                    id="btn-capture"
+                    onclick="capturePhoto()"
+                    disabled
+                    class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:scale-105 transition-transform flex items-center justify-center gap-3 opacity-40 cursor-not-allowed"
+                >
+                    <i data-lucide="camera" class="w-5 h-5"></i>
+                    <span id="btn-capture-label">Esperando detección...</span>
+                </button>
             </section>
 
             <!-- PANTALLA 3: CARGA / PROCESAMIENTO -->
@@ -240,6 +240,7 @@
         let faceDetectionInterval = null;
         let captureProgress = 0;
         let modelsLoaded = false;
+        let faceDetected = false;
 
         window.onload = () => {
             loadModels();
@@ -349,9 +350,8 @@
             const guide = document.getElementById('face-guide');
             const indicator = document.getElementById('face-indicator');
             const statusText = document.getElementById('face-text');
-            const progressContainer = document.getElementById('capture-progress-container');
-            const progressFill = document.getElementById('progress-fill');
-            const progressPercent = document.getElementById('progress-percent');
+            const btnCapture = document.getElementById('btn-capture');
+            const btnLabel = document.getElementById('btn-capture-label');
 
             faceDetectionInterval = setInterval(async () => {
                 let isDetected = false;
@@ -361,33 +361,32 @@
                 } else {
                     isDetected = true; // Fallback preventivo
                 }
-                
+
+                faceDetected = isDetected;
+
                 if (isDetected) {
                     guide.classList.add('active');
                     indicator.className = "w-2 h-2 rounded-full bg-emerald-500";
                     statusText.textContent = "ROSTRO DETECTADO";
-                    progressContainer.style.opacity = "1";
-                    
-                    captureProgress += 4;
-                    progressFill.style.width = `${captureProgress}%`;
-                    progressPercent.textContent = `${captureProgress}%`;
-
-                    if (captureProgress >= 100) {
-                        clearInterval(faceDetectionInterval);
-                        capturePhoto();
-                    }
+                    // Habilitar botón
+                    btnCapture.disabled = false;
+                    btnCapture.classList.remove('opacity-40', 'cursor-not-allowed');
+                    btnLabel.textContent = "Tomar Foto";
                 } else {
                     guide.classList.remove('active');
                     indicator.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
                     statusText.textContent = "BUSCANDO ROSTRO";
-                    captureProgress = Math.max(0, captureProgress - 2);
-                    progressFill.style.width = `${captureProgress}%`;
-                    progressPercent.textContent = `${captureProgress}%`;
+                    // Deshabilitar botón
+                    btnCapture.disabled = true;
+                    btnCapture.classList.add('opacity-40', 'cursor-not-allowed');
+                    btnLabel.textContent = "Esperando detección...";
                 }
-            }, 100);
+            }, 200);
         }
 
         function capturePhoto() {
+            if (!faceDetected) return;
+            clearInterval(faceDetectionInterval);
             const video = document.getElementById('video-feed');
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -493,14 +492,17 @@
 
         function resetFaceView() {
             captureProgress = 0;
+            faceDetected = false;
             document.getElementById('face-start-btn').classList.remove('hidden');
             document.getElementById('face-ui-overlay').classList.add('hidden');
             document.getElementById('face-guide').classList.add('hidden');
             document.getElementById('face-guide').classList.remove('active');
             document.getElementById('face-status-bubble').classList.add('hidden');
-            document.getElementById('capture-progress-container').style.opacity = "0";
-            document.getElementById('progress-fill').style.width = "0%";
-            document.getElementById('progress-percent').textContent = "0%";
+            // Resetear botón de captura
+            const btnCapture = document.getElementById('btn-capture');
+            btnCapture.disabled = true;
+            btnCapture.classList.add('opacity-40', 'cursor-not-allowed');
+            document.getElementById('btn-capture-label').textContent = "Esperando detección...";
         }
     </script>
 </body>
