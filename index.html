@@ -384,9 +384,41 @@
             }, 200);
         }
 
+        //function capturePhoto() {
+        //    if (!faceDetected) return;
+        //    clearInterval(faceDetectionInterval);
+        //   const video = document.getElementById('video-feed');
+        //    const canvas = document.createElement('canvas');
+        //    canvas.width = video.videoWidth;
+        //    canvas.height = video.videoHeight;
+        //    const ctx = canvas.getContext('2d');
+        //    ctx.scale(-1, 1);
+        //    ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            
+        //    document.getElementById('captured-photo').src = canvas.toDataURL('image/jpeg');
+        //    showView('preview');
+        //}
+
         function capturePhoto() {
             if (!faceDetected) return;
             clearInterval(faceDetectionInterval);
+
+            const btnCapture = document.getElementById('btn-capture');
+            const btnLabel = document.getElementById('btn-capture-label');
+            btnCapture.disabled = true;
+            btnCapture.classList.add('opacity-40', 'cursor-not-allowed');
+
+            let countdown = 5;
+            btnLabel.textContent = `Capturando en ${countdown}...`;
+
+            const countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+            btnLabel.textContent = `Capturando en ${countdown}...`;
+            } else {
+            clearInterval(countdownInterval);
+            btnLabel.textContent = "¡Capturando!";
+
             const video = document.getElementById('video-feed');
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -394,9 +426,11 @@
             const ctx = canvas.getContext('2d');
             ctx.scale(-1, 1);
             ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-            
+
             document.getElementById('captured-photo').src = canvas.toDataURL('image/jpeg');
             showView('preview');
+            }
+            }, 1000);
         }
 
         async function finalizeRegistration() {
