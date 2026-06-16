@@ -139,6 +139,8 @@
                     <video id="video-feed" class="absolute inset-0 w-full h-full object-cover scale-x-[-1]" autoplay playsinline></video>
                     <div id="face-ui-overlay" class="face-mask-overlay hidden"></div>
                     <div id="face-guide" class="face-guide hidden"></div>
+                    <div id="face-guide" class="face-guide hidden"></div>
+<div id="countdown-display" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold z-30 text-8xl drop-shadow-lg"></div>
                     <button id="face-start-btn" onclick="initFaceCamera()" class="relative z-20 px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:scale-105 transition-transform">Iniciar Captura Facial</button>
                     <div id="face-status-bubble" class="hidden absolute bottom-6 bg-black/70 backdrop-blur-md text-white px-5 py-2.5 rounded-full text-[10px] font-bold z-20 flex items-center gap-2 border border-white/10">
                         <span id="face-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -405,18 +407,24 @@
 
             const btnCapture = document.getElementById('btn-capture');
             const btnLabel = document.getElementById('btn-capture-label');
+            const countdownDisplay = document.getElementById('countdown-display');
+
             btnCapture.disabled = true;
             btnCapture.classList.add('opacity-40', 'cursor-not-allowed');
 
             let countdown = 5;
             btnLabel.textContent = `Capturando en ${countdown}...`;
+            countdownDisplay.classList.remove('hidden');
+            countdownDisplay.textContent = countdown;
 
             const countdownInterval = setInterval(() => {
             countdown--;
             if (countdown > 0) {
+            countdownDisplay.textContent = countdown;
             btnLabel.textContent = `Capturando en ${countdown}...`;
             } else {
             clearInterval(countdownInterval);
+            countdownDisplay.classList.add('hidden');
             btnLabel.textContent = "¡Capturando!";
 
             const video = document.getElementById('video-feed');
