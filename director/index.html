@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Director — Squality</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --green-dark: #1a5c2a;
+            --green-mid: #2db843;
+            --green-light: #e8f5eb;
+            --black: #1a1a1a;
+            --gray-900: #111827;
+            --gray-700: #374151;
+            --gray-500: #6b7280;
+            --gray-300: #d1d5db;
+            --gray-100: #f3f4f6;
+            --white: #ffffff;
+            --red: #dc2626;
+            --amber: #d97706;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-100);
+            color: var(--black);
+            min-height: 100vh;
+        }
+
+        /* LOGIN */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--green-dark);
+            padding: 24px;
+        }
+
+        .login-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-logo {
+            width: 52px;
+            height: 52px;
+            background: var(--green-dark);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .login-logo svg { width: 28px; height: 28px; color: white; }
+
+        .login-card h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 4px;
+        }
+
+        .login-card p {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-bottom: 32px;
+        }
+
+        .field { margin-bottom: 16px; }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .field input:focus { border-color: var(--green-mid); }
+
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: var(--green-dark);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover { background: #144a22; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .login-error {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--red);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        /* DASHBOARD */
+        #dashboard { display: none; min-height: 100vh; }
+
+        .topbar {
+            background: var(--green-dark);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-brand {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-badge {
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+        .main-content { padding: 32px; max-width: 1200px; margin: 0 auto; }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: white;
+            border-radius: var(--radius);
+            padding: 4px;
+            margin-bottom: 28px;
+            border: 1px solid var(--gray-300);
+            width: fit-content;
+        }
+
+        .tab-btn {
+            padding: 9px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--green-dark);
+            color: white;
+        }
+
+        /* FILTERS */
+        .filters-bar {
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"] {
+            padding: 9px 12px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            background: white;
+            min-width: 160px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input[type="date"]:focus { border-color: var(--green-mid); }
+
+        .btn-filter {
+            padding: 9px 20px;
+            background: var(--green-dark);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-filter:hover { background: #144a22; }
+
+        .btn-export {
+            padding: 9px 20px;
+            background: white;
+            color: var(--green-dark);
+            border: 1.5px solid var(--green-dark);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-export:hover { background: var(--green-light); }
+
+        /* TABLE */
+        .table-card {
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-300);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--black);
+        }
+
+        .table-count {
+            font-size: 12px;
+            color: var(--gray-500);
+            font-family: 'DM Mono', monospace;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--gray-100);
+            padding: 11px 20px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gray-500);
+            border-bottom: 1px solid var(--gray-300);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--gray-100);
+            transition: background 0.15s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--gray-100); }
+
+        tbody td {
+            padding: 13px 20px;
+            font-size: 13px;
+            color: var(--gray-700);
+        }
+
+        .td-name {
+            font-weight: 600;
+            color: var(--black);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-green { background: var(--green-light); color: var(--green-dark); }
+        .badge-red { background: #fef2f2; color: var(--red); }
+        .badge-amber { background: #fffbeb; color: var(--amber); }
+
+        .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+        /* EMPTY / LOADING */
+        .state-msg {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--gray-500);
+            font-size: 13px;
+        }
+
+        .state-msg svg {
+            width: 40px;
+            height: 40px;
+            color: var(--gray-300);
+            margin: 0 auto 12px;
+            display: block;
+        }
+
+        /* SPINNER */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--gray-300);
+            border-top-color: var(--green-dark);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 640px) {
+            .main-content { padding: 16px; }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+            .topbar { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+        </div>
+        <h1>Panel de Dirección</h1>
+        <p>Squality México — Control de Asistencia</p>
+
+        <div id="login-error" class="login-error">Contraseña incorrecta. Intenta de nuevo.</div>
+
+        <div class="field">
+            <label>Contraseña</label>
+            <input type="password" id="input-password" placeholder="••••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button class="btn-primary" onclick="doLogin()">Ingresar al panel</button>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+    <nav class="topbar">
+        <div class="topbar-left">
+            <span class="topbar-brand">Squality México</span>
+            <span class="topbar-badge">Director General</span>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </nav>
+
+    <div class="main-content">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('asistencias', this)">Asistencias</button>
+            <button class="tab-btn" onclick="switchTab('faltas', this)">Faltas</button>
+        </div>
+
+        <!-- TAB ASISTENCIAS -->
+        <div id="tab-asistencias">
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label>Empleado</label>
+                    <select id="filtro-empleado">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Desde</label>
+                    <input type="date" id="filtro-desde">
+                </div>
+                <div class="filter-group">
+                    <label>Hasta</label>
+                    <input type="date" id="filtro-hasta">
+                </div>
+                <button class="btn-filter" onclick="cargarAsistencias()">Consultar</button>
+                <button class="btn-export" onclick="exportarExcel('asistencias')">⬇ Exportar Excel</button>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <span class="table-title">Registros de asistencia</span>
+                    <span class="table-count" id="count-asistencias">—</span>
+                </div>
+                <div id="tabla-asistencias-wrap">
+                    <div class="state-msg">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Selecciona un rango de fechas y presiona Consultar.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB FALTAS -->
+        <div id="tab-faltas" style="display:none">
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label>Desde</label>
+                    <input type="date" id="filtro-faltas-desde">
+                </div>
+                <div class="filter-group">
+                    <label>Hasta</label>
+                    <input type="date" id="filtro-faltas-hasta">
+                </div>
+                <button class="btn-filter" onclick="cargarFaltas()">Consultar</button>
+                <button class="btn-export" onclick="exportarExcel('faltas')">⬇ Exportar Excel</button>
+            </div>
+|
+            <div class="table-card">
+                <div class="table-header">
+                    <span class="table-title">Faltas por empleado</span>
+                    <span class="table-count" id="count-faltas">—</span>
+                </div>
+                <div id="tabla-faltas-wrap">
+                    <div class="state-msg">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        Selecciona un rango de fechas y presiona Consultar.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    const API_LOCAL = "http://127.0.0.1:8000";
+    const API_CLOUD = "https://control-es-qr-281979635747.northamerica-south1.run.app";
+    const API_KEY = "Director";
+    const PASSWORD = "admin";
+
+    let datosAsistencias = [];
+    let datosFaltas = [];
+
+    // ─── AUTH ─────────────────────────────────────────────────────────────
+    function doLogin() {
+        const pwd = document.getElementById('input-password').value;
+        if (pwd === PASSWORD) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            cargarEmpleados();
+            setFechasHoy();
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    }
+
+        function doLogout() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('input-password').value = '';
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        // ─── API ───────────────────────────────────────────────────────────────
+        async function getApiBase() {
+            return API_LOCAL;
+        }
+        async function apiFetch(path) {
+            const base = await getApiBase();
+            const res = await fetch(`${base}${path}`, {
+                headers: { 'x-api-key': API_KEY }
+            });
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            return res.json();
+        }
+
+        // ─── INIT ──────────────────────────────────────────────────────────────
+        function setFechasHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('filtro-desde').value = hoy;
+            document.getElementById('filtro-hasta').value = hoy;
+            document.getElementById('filtro-faltas-desde').value = hoy;
+            document.getElementById('filtro-faltas-hasta').value = hoy;
+        }
+
+    async function cargarEmpleados() {
+        try {
+            const empleados = await apiFetch('/api/v1/director/empleados');
+            const select = document.getElementById('filtro-empleado');
+            empleados.forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.nombre;
+                select.appendChild(opt);
+            });
+        } catch (e) { console.error('Error cargando empleados', e); }
+    }
+
+    // ─── TABS ──────────────────────────────────────────────────────────────
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-asistencias').style.display = tab === 'asistencias' ? 'block' : 'none';
+        document.getElementById('tab-faltas').style.display = tab === 'faltas' ? 'block' : 'none';
+    }
+
+    // ─── ASISTENCIAS ───────────────────────────────────────────────────────
+    async function cargarAsistencias() {
+        const wrap = document.getElementById('tabla-asistencias-wrap');
+        wrap.innerHTML = '<div class="state-msg"><div class="spinner"></div>Cargando registros...</div>';
+
+        const empleadoId = document.getElementById('filtro-empleado').value;
+        const desde = document.getElementById('filtro-desde').value;
+        const hasta = document.getElementById('filtro-hasta').value;
+
+        let params = new URLSearchParams();
+        if (empleadoId) params.append('empleado_id', empleadoId);
+        if (desde) params.append('fecha_inicio', desde);
+        if (hasta) params.append('fecha_fin', hasta);
+
+        try {
+            datosAsistencias = await apiFetch(`/api/v1/director/asistencias?${params}`);
+            document.getElementById('count-asistencias').textContent = `${datosAsistencias.length} registros`;
+            renderTablaAsistencias(datosAsistencias);
+        } catch (e) {
+            wrap.innerHTML = '<div class="state-msg">Error al cargar los datos. Verifica la conexión.</div>';
+        }
+    }
+
+    function renderTablaAsistencias(datos) {
+        const wrap = document.getElementById('tabla-asistencias-wrap');
+        if (datos.length === 0) {
+            wrap.innerHTML = '<div class="state-msg">Sin registros para los filtros seleccionados.</div>';
+            return;
+        }
+
+        wrap.innerHTML = `
+            <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Cargo</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${datos.map(r => `
+                        <tr>
+                            <td class="td-name">${r.nombre}</td>
+                            <td>${r.cargo || '—'}</td>
+                            <td class="mono">${r.fecha_entrada || '—'}</td>
+                            <td class="mono">${r.fecha_salida || '—'}</td>
+                            <td>
+                                ${r.fecha_salida
+                                    ? '<span class="badge badge-green">Completo</span>'
+                                    : '<span class="badge badge-amber">Sin salida</span>'}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            </div>`;
+    }
+
+    // ─── FALTAS ────────────────────────────────────────────────────────────
+    async function cargarFaltas() {
+        const wrap = document.getElementById('tabla-faltas-wrap');
+        wrap.innerHTML = '<div class="state-msg"><div class="spinner"></div>Cargando faltas...</div>';
+
+        const desde = document.getElementById('filtro-faltas-desde').value;
+        const hasta = document.getElementById('filtro-faltas-hasta').value;
+
+        let params = new URLSearchParams();
+        if (desde) params.append('fecha_inicio', desde);
+        if (hasta) params.append('fecha_fin', hasta);
+
+        try {
+            datosFaltas = await apiFetch(`/api/v1/director/faltas?${params}`);
+            document.getElementById('count-faltas').textContent = `${datosFaltas.length} faltas`;
+            renderTablaFaltas(datosFaltas);
+        } catch (e) {
+            wrap.innerHTML = '<div class="state-msg">Error al cargar los datos. Verifica la conexión.</div>';
+        }
+    }
+
+    function renderTablaFaltas(datos) {
+        const wrap = document.getElementById('tabla-faltas-wrap');
+        if (datos.length === 0) {
+            wrap.innerHTML = '<div class="state-msg">Sin faltas en el período seleccionado. ✓</div>';
+            return;
+        }
+
+        wrap.innerHTML = `
+            <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Cargo</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${datos.map(r => `
+                        <tr>
+                            <td class="td-name">${r.nombre}</td>
+                            <td>${r.cargo || '—'}</td>
+                            <td class="mono">${r.fecha}</td>
+                            <td><span class="badge badge-red">Falta</span></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            </div>`;
+    }
+
+    // ─── EXPORT ────────────────────────────────────────────────────────────
+    function exportarExcel(tipo) {
+        const datos = tipo === 'asistencias' ? datosAsistencias : datosFaltas;
+        if (!datos || datos.length === 0) {
+            alert('No hay datos para exportar. Primero realiza una consulta.');
+            return;
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(datos);
+        XLSX.utils.book_append_sheet(wb, ws, tipo === 'asistencias' ? 'Asistencias' : 'Faltas');
+
+        const fecha = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `squality_${tipo}_${fecha}.xlsx`);
+    }
+</script>
+</body>
+</html>
