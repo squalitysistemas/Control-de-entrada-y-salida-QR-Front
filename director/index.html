@@ -513,56 +513,53 @@
     let datosAsistencias = [];
     let datosFaltas = [];
 
+    // ─── API BASE DETECTION ────────────────────────────────────────────────
+    async function getApiBase() {
+        try {
+            const res = await fetch(`${API_LOCAL}/api/v1/`, { signal: AbortSignal.timeout(2000) });
+            if (res.ok) return API_LOCAL;
+        } catch (e) {}
+        return API_CLOUD;
+    }
+
+    async function apiFetch(path) {
+        const base = await getApiBase();
+        const res = await fetch(`${base}${path}`, {
+            headers: { 'x-api-key': API_KEY }
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+    }
+
     // ─── AUTH ─────────────────────────────────────────────────────────────
-    function doLogin() {
+    async function doLogin() {
         const pwd = document.getElementById('input-password').value;
         if (pwd === PASSWORD) {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            cargarEmpleados();
+            document.getElementById('count-asistencias').textContent = 'Conectando...';
             setFechasHoy();
+            await cargarEmpleados();
         } else {
             document.getElementById('login-error').style.display = 'block';
         }
     }
 
-        function doLogout() {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('input-password').value = '';
-            document.getElementById('login-error').style.display = 'none';
-        }
+    function doLogout() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('input-password').value = '';
+        document.getElementById('login-error').style.display = 'none';
+    }
 
-        // ─── API ───────────────────────────────────────────────────────────────
-        async function doLogin() {
-            const pwd = document.getElementById('input-password').value;
-            if (pwd === PASSWORD) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('count-asistencias').textContent = 'Conectando...';
-                setFechasHoy();
-                await cargarEmpleados();
-                } else {
-                document.getElementById('login-error').style.display = 'block';
-             }
-        }
-        async function apiFetch(path) {
-            const base = await getApiBase();
-            const res = await fetch(`${base}${path}`, {
-                headers: { 'x-api-key': API_KEY }
-            });
-            if (!res.ok) throw new Error(`Error ${res.status}`);
-            return res.json();
-        }
-
-        // ─── INIT ──────────────────────────────────────────────────────────────
-        function setFechasHoy() {
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('filtro-desde').value = hoy;
-            document.getElementById('filtro-hasta').value = hoy;
-            document.getElementById('filtro-faltas-desde').value = hoy;
-            document.getElementById('filtro-faltas-hasta').value = hoy;
-        }
+    // ─── INIT ──────────────────────────────────────────────────────────────
+    function setFechasHoy() {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('filtro-desde').value = hoy;
+        document.getElementById('filtro-hasta').value = hoy;
+        document.getElementById('filtro-faltas-desde').value = hoy;
+        document.getElementById('filtro-faltas-hasta').value = hoy;
+    }
 
     async function cargarEmpleados() {
         try {
@@ -614,17 +611,12 @@
             wrap.innerHTML = '<div class="state-msg">Sin registros para los filtros seleccionados.</div>';
             return;
         }
-
         wrap.innerHTML = `
             <div style="overflow-x:auto">
             <table>
                 <thead>
                     <tr>
-                        <th>Empleado</th>
-                        <th>Cargo</th>
-                        <th>Entrada</th>
-                        <th>Salida</th>
-                        <th>Estado</th>
+                        <th>Empleado</th><th>Cargo</th><th>Entrada</th><th>Salida</th><th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -634,11 +626,9 @@
                             <td>${r.cargo || '—'}</td>
                             <td class="mono">${r.fecha_entrada || '—'}</td>
                             <td class="mono">${r.fecha_salida || '—'}</td>
-                            <td>
-                                ${r.fecha_salida
-                                    ? '<span class="badge badge-green">Completo</span>'
-                                    : '<span class="badge badge-amber">Sin salida</span>'}
-                            </td>
+                            <td>${r.fecha_salida
+                                ? '<span class="badge badge-green">Completo</span>'
+                                : '<span class="badge badge-amber">Sin salida</span>'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -673,16 +663,12 @@
             wrap.innerHTML = '<div class="state-msg">Sin faltas en el período seleccionado. ✓</div>';
             return;
         }
-
         wrap.innerHTML = `
             <div style="overflow-x:auto">
             <table>
                 <thead>
                     <tr>
-                        <th>Empleado</th>
-                        <th>Cargo</th>
-                        <th>Fecha</th>
-                        <th>Estado</th>
+                        <th>Empleado</th><th>Cargo</th><th>Fecha</th><th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -706,11 +692,9 @@
             alert('No hay datos para exportar. Primero realiza una consulta.');
             return;
         }
-
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(datos);
         XLSX.utils.book_append_sheet(wb, ws, tipo === 'asistencias' ? 'Asistencias' : 'Faltas');
-
         const fecha = new Date().toISOString().split('T')[0];
         XLSX.writeFile(wb, `squality_${tipo}_${fecha}.xlsx`);
     }
