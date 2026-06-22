@@ -534,12 +534,17 @@
         }
 
         // ─── API ───────────────────────────────────────────────────────────────
-        async function getApiBase() {
-            try {
-                const res = await fetch(`${API_LOCAL}/api/v1/`, { signal: AbortSignal.timeout(2000) });
-                if (res.ok) return API_LOCAL;
-            } catch (e) {}
-            return API_CLOUD;
+        async function doLogin() {
+            const pwd = document.getElementById('input-password').value;
+            if (pwd === PASSWORD) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('count-asistencias').textContent = 'Conectando...';
+                setFechasHoy();
+                await cargarEmpleados();
+                } else {
+                document.getElementById('login-error').style.display = 'block';
+             }
         }
         async function apiFetch(path) {
             const base = await getApiBase();
