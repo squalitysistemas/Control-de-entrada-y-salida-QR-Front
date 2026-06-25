@@ -234,7 +234,7 @@
         return API_CLOUD;
         }
 
-
+        let isSubmitting = false;
         let stream = null;
         let qrScanner = null;
         let currentSerial = null; 
@@ -442,37 +442,34 @@
         }
 
         async function finalizeRegistration() {
-            const photoBase64 = document.getElementById('captured-photo').src.split(',')[1];
-            
-            setLoading(true, "Finalizando Registro", `Realizando registro de asistencia para ${currentEmployeeName}...`);
-            
+            if (isSubmitting) return;  // ← bloquea el segundo click
+                isSubmitting = true;
+
+                const photoBase64 = document.getElementById('captured-photo').src.split(',')[1];
+    
+                setLoading(true, "Finalizando Registro", `Realizando registro de asistencia...`);
+    
             try {
-                //const res = await fetch(ENDPOINTS.compare, {
                 const apiBase = await getApiBase();
                 const res = await fetch(`${apiBase}/api/v1/asistencia`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                    //    serial_qr: currentSerial,
-                        imagen: photoBase64
-                    })
-                });
-                
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imagen: photoBase64 })
+            });
 
-                const data = await res.json();
-                setLoading(false);
+            const data = await res.json();
+            setLoading(false);
 
-                if (res.ok) {
-                    const successMessage = data.message || "Proceso completado correctamente.";
-                    showFinalResult(true, "¡Proceso Exitoso!", successMessage, true);
-                } else {
-                    // Captura dinámica del error desde 'detail' o 'message'
-                    const errorMessage = data.detail || data.message || "No se pudo verificar la biometría.";
-                    showFinalResult(false, "Atención", errorMessage, true);
-                }
+            if (res.ok) {
+            showFinalResult(true, "¡Proceso Exitoso!", data.message || "Proceso completado correctamente.", true);
+            } else {
+            showFinalResult(false, "Atención", data.detail || data.message || "No se pudo verificar la biometría.", true);
+            }
             } catch (e) {
-                setLoading(false);
-                showFinalResult(false, "Error de Sistema", "Hubo un problema al procesar la comparación biométrica.", true);
+            setLoading(false);
+            showFinalResult(false, "Error de Sistema", "Hubo un problema al procesar la comparación biométrica.", true);
+            } finally {
+            isSubmitting = false;  // ← libera al terminar
             }
         }
 
