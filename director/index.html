@@ -526,14 +526,20 @@
         return API_CLOUD;
     }
 
-    async function apiFetch(path) {
-        const base = await getApiBase();
-        const res = await fetch(`${base}${path}`, {
+   async function apiFetch(path) {
+    const base = await getApiBase();
+    let res = await fetch(`${base}${path}`, {
+        headers: { 'x-api-key': API_KEY }
+    });
+    // El backend local no tiene las rutas del director: si da 404, usar Cloud Run
+    if (res.status === 404 && base === API_LOCAL) {
+        res = await fetch(`${API_CLOUD}${path}`, {
             headers: { 'x-api-key': API_KEY }
         });
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        return res.json();
     }
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    return res.json();
+}
 
     // ─── AUTH ─────────────────────────────────────────────────────────────
     async function doLogin() {
